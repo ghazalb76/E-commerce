@@ -1,0 +1,33 @@
+networks: 
+  default: 
+    name: ds
+    external: true
+services:
+  fin_db:
+    image: postgres
+    volumes:
+      - ./data/db:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=financial
+      - POSTGRES_USER=financial
+      - POSTGRES_PASSWORD=123
+  fin_web:
+    build: .
+#    command: uwsgi --http 0.0.0.0:8000 --module distributed.wsgi
+    command: sh -c "python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
+    volumes:
+      - .:/code
+    ports:
+      - "8001:8000"
+    environment:
+      - DB_NAME=financial
+      - DB_USER=financial
+      - DB_PASS=123
+      - DB_HOST=fin_db
+    depends_on:
+      - fin_db
+#  nginx:
+#    container_name: nginx_container
+#    build: ./nginx
+#    ports:
+#      - 80:80

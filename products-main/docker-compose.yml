@@ -1,0 +1,33 @@
+networks: 
+  default: 
+    name: ds
+    external: true
+services:
+  inv_db:
+    image: postgres
+    volumes:
+      - ./data/db:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=inventory
+      - POSTGRES_USER=inventory
+      - POSTGRES_PASSWORD=123
+  inv_web:
+    build: .
+#    command: uwsgi --http 0.0.0.0:8000 --module distributed.wsgi
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - .:/code
+    ports:
+      - "8002:8000"
+    environment:
+      - DB_NAME=inventory
+      - DB_USER=inventory
+      - DB_PASS=123
+      - DB_HOST=inv_db
+    depends_on:
+      - inv_db
+#  nginx:
+#    container_name: nginx_container
+#    build: ./nginx
+#    ports:
+#      - 80:80

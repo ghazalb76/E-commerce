@@ -1,0 +1,33 @@
+networks:
+  default:
+    name: ds
+    external: true
+services:
+  order_db:
+    image: postgres
+    volumes:
+      - ./data/db:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=order
+      - POSTGRES_USER=order
+      - POSTGRES_PASSWORD=123
+  order_web:
+    build: .
+#    command: uwsgi --http 0.0.0.0:8000 --module order.wsgi
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - .:/code
+    ports:
+      - "8000:8000"
+    environment:
+      - DB_NAME=order
+      - DB_USER=order
+      - DB_PASS=123
+      - DB_HOST=order_db
+    depends_on:
+      - order_db
+#  nginx:
+#    container_name: nginx_container
+#    build: ./nginx
+#    ports:
+#      - 80:80
